@@ -23,11 +23,11 @@ class CryptosystemsManager {
 		switch(args[0]) {
 			case "-e": 
 			case "-encryption":
-				encrypt(args);
+				crypt(args, false);
 				break;
 			case "-d":
 			case "-decrypt":
-				decrypt(args);
+				crypt(args, true);
 				break;
 			default:
 				System.out.println("Argument not recognized");
@@ -36,7 +36,10 @@ class CryptosystemsManager {
 	}
 
 	// Handles the encrypting of cryptosystems
-	private static void encrypt(String[] args) {
+	private static void crypt(String[] args, boolean decrypt) {
+		// Modifier to keep track of encrypt/decrypt
+		int modifier = 1;
+		if (decrypt) modifier = -1;
 		Scanner c = new Scanner(System.in);
 		Cryptosystem c_sys;
 		// If user gives us the system in args
@@ -64,11 +67,11 @@ class CryptosystemsManager {
 			case CAESAR:
 				// User included plaintext in args
 				if (args.length > 2) {
-					shift_cipher(true, 3, args[2]);
+					shift_cipher(3 * modifier, args[2]);
 				}
 				// Ask user for plaintext
 				else {
-					shift_cipher(true, 3, input_to_string(c));
+					shift_cipher(3 * modifier, input_to_string(c));
 				}
 				break;
 			case SHIFT:
@@ -76,37 +79,30 @@ class CryptosystemsManager {
 				if (args.length > 2) {
 					// Plaintext included in args
 					if (args.length > 3) {
-						shift_cipher(true, Integer.parseInt(args[2]), args[3]);
+						shift_cipher(Integer.parseInt(args[2]) * modifier, args[3]);
 					}
 					// Ask user for plaintext
 					else {
-						shift_cipher(true, Integer.parseInt(args[2]), input_to_string(c));
+						shift_cipher(Integer.parseInt(args[2]) * modifier, input_to_string(c));
 					}
 				}
 				// Ask user for shift amount and plaintext
 				else {
 					System.out.print("Amount to shift by: ");
 					int shift_amount = c.nextInt();
-					shift_cipher(true, shift_amount, input_to_string(c));
+					shift_cipher(shift_amount * modifier, input_to_string(c));
 				}	
 				break;
 			default:
 				break;
 		}
 		c.close();
-	}
-
-	// Handles the decryption of cryptosystems
-	private static void decrypt(String[] args) {
-
-	}
+	}  
 	
 	// Helper function for determining which Enum matches a given string.
 	private static Cryptosystem str_to_sys(String str) {
 		for (Cryptosystem c_sys : Cryptosystem.values()) {
-			if (c_sys.name().equals(str)) {
-				return c_sys;
-			}
+			if (c_sys.name().equals(str)) return c_sys;
 		}
 		return null;
 	}
@@ -117,26 +113,42 @@ class CryptosystemsManager {
                 String input = "";
 		while (c.hasNext()) {
 			input += c.nextLine();
-			if (input.length() > 0) 
-				break;
+			if (input.length() > 0) break;
 		}
 		return input;
 	}
 
 	// Function for running a shift cipher
-	private static void shift_cipher(boolean encrypt, int shift, String plaintext) {
-		// If we are encrypting
-		if (encrypt) {
-			String ciphertext = "";
-			for (int i = 0; i < plaintext.length(); i++) {
-				char curr = (char)(plaintext.charAt(i) + shift);
-				ciphertext += curr;
+	private static void shift_cipher(int shift, String plaintext) {
+		String ciphertext = "";
+		shift %= 26;
+		for (int i = 0; i < plaintext.length(); i++) {
+			char curr = plaintext.charAt(i);
+			// Apply shift to only letters
+			if (Character.isLetter(curr)) {
+				// Handle Uppercase
+				if (Character.isUpperCase(curr)) {
+					curr = (char)(curr + shift);
+					if (curr < 'A') {
+						curr = (char)(curr + 26);
+					}
+					else if (curr > 'Z') {
+						curr = (char)(curr - 26);
+					}
+				}
+				// Handle Lowercase
+				else {
+					curr = (char)(curr + shift);
+					if (curr < 'a') {
+						curr = (char)(curr + 26);
+					}
+					else if (curr > 'z') {
+						curr = (char)(curr - 26);
+					}
+				}
 			}
-			System.out.println("Ciphertext: " + ciphertext);
+			ciphertext += curr;
 		}
-		// If we are decrypting
-		else {
-
-		}
+		System.out.println(ciphertext);
 	}	
 }
