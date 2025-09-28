@@ -12,15 +12,27 @@ import java.util.Scanner;
 // Enum Class to store all the cryptosystems
 enum Cryptosystem {
 	CAESAR,
-	SHIFT;
+	SHIFT,
+	VIGENERE;
 }
 
 // Cryptosystem Class
 class CryptosystemsManager {
 	
 	public static void main(String[] args) {
-		// Check args and run needed function.
-		switch(args[0]) {
+		String mode = "";
+		// Check if no arguments are given
+		if (args.length == 0) {
+			Scanner c = new Scanner(System.in);
+			System.out.print("Encrypt (E) or Decrypt (D): ");
+			mode = "-" + c.next().toLowerCase();
+		}
+		// If arguments given, set mode to first args
+		else {
+			mode = args[0];
+		}
+		// Check args and run needed function
+		switch(mode) {
 			case "-e": 
 			case "-encryption":
 				crypt(args, false);
@@ -65,33 +77,71 @@ class CryptosystemsManager {
 		// Run function for matching system selected
 		switch(c_sys) {
 			case CAESAR:
-				// User included plaintext in args
+				// User included text in args
 				if (args.length > 2) {
-					shift_cipher(3 * modifier, args[2]);
+					System.out.println(shift_cipher(3 * modifier, args[2]));
 				}
-				// Ask user for plaintext
+				// Ask user for text
 				else {
-					shift_cipher(3 * modifier, input_to_string(c));
+					System.out.print("Text to encrypt: ");
+					System.out.println(shift_cipher(3 * modifier, input_to_string(c)));
 				}
 				break;
 			case SHIFT:
 				// User included shift amount in args
 				if (args.length > 2) {
-					// Plaintext included in args
+					// Text included in args
 					if (args.length > 3) {
-						shift_cipher(Integer.parseInt(args[2]) * modifier, args[3]);
+						System.out.println(shift_cipher(Integer.parseInt(args[2]) * modifier, args[3]));
 					}
-					// Ask user for plaintext
+					// Ask user for text
 					else {
-						shift_cipher(Integer.parseInt(args[2]) * modifier, input_to_string(c));
+						System.out.print("Text to encrypt: ");
+						System.out.println(shift_cipher(Integer.parseInt(args[2]) * modifier, input_to_string(c)));
 					}
 				}
-				// Ask user for shift amount and plaintext
+				// Ask user for shift amount and text
 				else {
 					System.out.print("Amount to shift by: ");
 					int shift_amount = c.nextInt();
-					shift_cipher(shift_amount * modifier, input_to_string(c));
+					System.out.print("Text to encrypt: ");
+					System.out.println(shift_cipher(shift_amount * modifier, input_to_string(c)));
 				}	
+				break;
+			case VIGENERE:
+				int[] shifts;
+				// Check if user entered a shift list
+				if (args.length > 2) {
+						String[] str_shifts = args[1].split(","); // Split input text at each comma
+                     	// Update int array
+                     	shifts = new int[str_shifts.length];
+                     	for (int i = 0; i < str_shifts.length; i++) {
+                        	shifts[i] = Integer.parseInt(str_shifts[i]) * modifier;
+						}
+						// Text included in args
+						if (args.length > 3) {
+							vigenere(shifts, args[2]);	
+						}
+						// Ask user for text
+						else {
+							System.out.print("Text to encrypt: ");
+		                    vigenere(shifts, input_to_string(c));
+						}
+				}
+				// Ask user for shift list and text
+				else {
+					System.out.print("Give list to shift each character by seperated by a comma: ");
+					String shift_list = input_to_string(c).trim().replaceAll("\\s",""); // Grab and format input
+					String[] str_shifts = shift_list.split(","); // Split input text at each comma
+					// Update int array 
+					shifts = new int[str_shifts.length];
+					for (int i = 0; i < str_shifts.length; i++) {
+						shifts[i] = Integer.parseInt(str_shifts[i]) * modifier;
+					}
+					// Get text
+					System.out.print("Text to encrypt: ");
+                    vigenere(shifts, input_to_string(c));
+				}
 				break;
 			default:
 				break;
@@ -109,8 +159,8 @@ class CryptosystemsManager {
 
 	// Helper function to get text input from user
 	private static String input_to_string(Scanner c) {
-		System.out.print("Text to encrypt: ");
-                String input = "";
+		//System.out.print("Text to encrypt: "); 
+        String input = "";
 		while (c.hasNext()) {
 			input += c.nextLine();
 			if (input.length() > 0) break;
@@ -118,8 +168,19 @@ class CryptosystemsManager {
 		return input;
 	}
 
+	// Helper function that runs a vigenere cipher
+	private static void vigenere(int[] shifts, String text) {
+		int count = 0;
+		String output = "";
+		for (int i = 0; i < text.length(); i++) {
+			output += shift_cipher(shifts[count], text.charAt(i) + "");
+			if (++count == shifts.length) count = 0; 
+		}
+		System.out.println(output);
+	}
+
 	// Function for running a shift cipher
-	private static void shift_cipher(int shift, String plaintext) {
+	private static String shift_cipher(int shift, String plaintext) {
 		String ciphertext = "";
 		shift %= 26;
 		for (int i = 0; i < plaintext.length(); i++) {
@@ -149,6 +210,6 @@ class CryptosystemsManager {
 			}
 			ciphertext += curr;
 		}
-		System.out.println(ciphertext);
+		return ciphertext;
 	}	
 }
