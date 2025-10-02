@@ -21,130 +21,146 @@ enum Cryptosystem {
 // Cryptosystem Class
 class CryptosystemsManager {
 	
+	public static Scanner c;
+
 	public static void main(String[] args) {
-
-	}
-
-	private static select
-
-	// Handles the encrypting of cryptosystems
-	private static void crypt(String[] args, boolean decrypt) {
-		// Modifier to keep track of encrypt/decrypt
-		int modifier = 1;
-		if (decrypt) modifier = -1;
-		Scanner c = new Scanner(System.in);
-		Cryptosystem c_sys;
-		// If user gives us the system in args
-		if (args.length > 1)
-			c_sys = str_to_sys(args[1]);
-		// If they leave args blank, prompt user and show them which systems we have
-		else {
-			System.out.println("Which Cryptosystem would you like to run?");
-			int i = 1;
-			for (Cryptosystem curr_c_sys : Cryptosystem.values()) {
-				System.out.println(i++ + " ~ " + curr_c_sys);
-			}
-			// User inputs number of system
-			if (c.hasNextInt()) {
-				i = c.nextInt() - 1;
-				c_sys = Cryptosystem.values()[i];
-			}
-			// User inputs name of system
-			else {
-				c_sys = str_to_sys(c.next().toUpperCase());
-			}	
-		}
-		// Run function for matching system selected
-		switch(c_sys) {
-			case CAESAR:
-				// User included text in args
-				if (args.length > 2) {
-					System.out.println(Ciphers.shift_cipher(3 * modifier, args[2]));
-				}
-				// Ask user for text
-				else {
-					System.out.print("Text to encrypt: ");
-					System.out.println(Ciphers.shift_cipher(3 * modifier, input_to_string(c)));
-				}
-				break;
-			case SHIFT:
-				// User included shift amount in args
-				if (args.length > 2) {
-					// Text included in args
-					if (args.length > 3) {
-						System.out.println(Ciphers.shift_cipher(Integer.parseInt(args[2]) * modifier, args[3]));
-					}
-					// Ask user for text
-					else {
-						System.out.print("Text to encrypt: ");
-						System.out.println(Ciphers.shift_cipher(Integer.parseInt(args[2]) * modifier, input_to_string(c)));
-					}
-				}
-				// Ask user for shift amount and text
-				else {
-					System.out.print("Amount to shift by: ");
-					int shift_amount = c.nextInt();
-					System.out.print("Text to encrypt: ");
-					System.out.println(Ciphers.shift_cipher(shift_amount * modifier, input_to_string(c)));
-				}	
-				break;
-			case VIGENERE:
-				int[] shifts;
-				// Check if user entered a shift list
-				if (args.length > 2) {
-						String[] str_shifts = args[1].split(","); // Split input text at each comma
-                     	// Update int array
-                     	shifts = new int[str_shifts.length];
-                     	for (int i = 0; i < str_shifts.length; i++) {
-                        	shifts[i] = Integer.parseInt(str_shifts[i]) * modifier;
-						}
-						// Text included in args
-						if (args.length > 3) {
-							System.out.println(Ciphers.vigenere(shifts, args[2]));	
-						}
-						// Ask user for text
-						else {
-							System.out.print("Text to encrypt: ");
-		                    System.out.println(Ciphers.vigenere(shifts, input_to_string(c)));
-						}
-				}
-				// Ask user for shift list and text
-				else {
-					System.out.print("Give list to shift each character by seperated by a comma: ");
-					String shift_list = input_to_string(c).trim().replaceAll("\\s",""); // Grab and format input
-					String[] str_shifts = shift_list.split(","); // Split input text at each comma
-					// Update int array 
-					shifts = new int[str_shifts.length];
-					for (int i = 0; i < str_shifts.length; i++) {
-						shifts[i] = Integer.parseInt(str_shifts[i]) * modifier;
-					}
-					// Get text
-					System.out.print("Text to encrypt: ");
-                    System.out.println(Ciphers.vigenere(shifts, input_to_string(c)));
-				}
-				break;
-			default:
-				break;
-		}
+		c = new Scanner(System.in);
+		Cryptosystem curr_sys = cipher_select(args.length > 0 ? args[0] : ask_cipher());
+		boolean encrypt = encrypting(args.length > 1 ? args[1] : ask_encrypt());
+		String text = args.length > 2 ? args[2] : get_text(encrypt);
+		text = run_cipher(curr_sys, encrypt, text, (args.length > 3 ? args[3] : get_key(curr_sys)));
+		System.out.println((encrypt ? "Ciphertext: " : "Plaintext: ") + text);
 		c.close();
-	}  
-	
-	// Helper function for determining which Enum matches a given string.
-	private static Cryptosystem str_to_sys(String str) {
-		for (Cryptosystem c_sys : Cryptosystem.values()) {
-			if (c_sys.name().equals(str)) return c_sys;
-		}
-		return null;
 	}
 
-	// Helper function to get text input from user
-	private static String input_to_string(Scanner c) {
-		//System.out.print("Text to encrypt: "); 
+	/**
+	 *
+	 */
+	private static Cryptosystem cipher_select(String cipher_str) {
+		switch(cipher_str.toUpperCase()) {
+				case "CAESAR":
+				case "1":
+					return Cryptosystem.CAESAR;
+				case "SHIFT":
+				case "2":
+					return Cryptosystem.SHIFT;
+				case "VIGENERE":
+				case "3":
+					return Cryptosystem.VIGENERE;
+				default:
+					System.out.println("Cipher " + cipher_str + " is not recognized option.");
+					return cipher_select(ask_cipher());				
+		}
+	}
+
+	/**
+	 *
+	 */
+	private static String ask_cipher() {
+		System.out.println("Which Cryptosystem would you like to run?");
+		int i = 0;
+		for (Cryptosystem curr_crysys : Cryptosystem.values()) {
+			System.out.println((++i) + " ~ " + curr_crysys); // Print out all cryptosystems
+		}
+		return c.next();
+	}
+
+	/**
+	 *
+	 */
+	private static boolean encrypting(String to_encrypt) {
+			switch(to_encrypt.toLowerCase()) {
+				case "-encryption":
+				case "-encrypt":
+				case "-e":
+						return true;
+				case "-decryption":
+				case "-decrypt":
+				case "-d":
+						return false;
+				default:
+						System.out.println("Selection \"" + to_encrypt + "\" unclear, please try again.");
+						return encrypting(ask_encrypt());
+			}
+	}
+
+	/**
+	 *
+	 */
+	private static String ask_encrypt() {
+		System.out.print("Encrypt (e) or Decrypt (d): ");
+		return "-" + c.next();
+	}
+
+	/**
+	 *
+	 */
+	private static String get_text(boolean plaintext) {
+		if (plaintext) System.out.print("Enter plaintext: ");
+		else System.out.print("Enter Ciphertext: ");
+		return input_to_string();
+	}
+
+	/**
+	 *
+	 */
+	private static String get_key(Cryptosystem sys) {
+			switch(sys) {
+				case CAESAR:
+						return "3";
+				case SHIFT:
+						System.out.print("Amount to shift by: ");
+						return c.next();
+				case VIGENERE:
+						System.out.print("Enter keyword: ");
+						return c.next();
+				default :
+						System.out.println("Error handling here TODO");
+						return "";
+			}
+	}
+
+	/**
+	 *
+	 */
+	private static String run_cipher(Cryptosystem sys, boolean encrypt, String text, String key ) {
+		switch (sys) {
+			case CAESAR:
+			case SHIFT:
+					return Ciphers.shift_cipher((encrypt ? 1 : -1) * Integer.parseInt(key), text);
+			case VIGENERE:
+					return Ciphers.vigenere(string_to_arr(key, encrypt), text);					
+			default:	
+					System.out.println("cipher: " + sys + "\tencrypt: " + encrypt + "\ttext: \"" + text + "\"\tkey: " + key);
+					break;
+		}
+		return "";
+	}
+
+	/**
+	 *
+	 */
+	private static String input_to_string() {
         String input = "";
 		while (c.hasNext()) {
 			input += c.nextLine();
 			if (input.length() > 0) break;
 		}
 		return input;
-	}	
+	}
+
+	/**
+	 *
+	 */
+	private static int[] string_to_arr(String key, boolean encrypt) {
+        int multiplier = encrypt ? 1 : -1;
+        int[] arr = new int[key.length()];
+        for (int i = 0; i < key.length(); i++) {
+            char curr_val = Character.toUpperCase(key.charAt(i));
+            if (Character.isLetter(curr_val)) {
+                arr[i] = (Character.getNumericValue(curr_val) - 10) * multiplier;
+            }
+        }
+        return arr;
+    }	
 }

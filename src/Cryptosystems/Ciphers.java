@@ -15,8 +15,11 @@ public class Ciphers {
 		int count = 0;
 		StringBuilder ciphertext = new StringBuilder();
 		for (int i = 0; i < text.length(); i++) {
-			ciphertext.append(shift_cipher(shifts[count], text.charAt(i) + ""));
-			if (++count == shifts.length) count = 0; 
+			if (Character.isLetter(text.charAt(i))) {
+				ciphertext.append(shift_cipher(shifts[count], text.charAt(i) + ""));
+				if (++count == shifts.length) count = 0;
+			}
+			else ciphertext.append(text.charAt(i));	
 		}
 		return ciphertext.toString();
 	}
@@ -30,12 +33,13 @@ public class Ciphers {
 		for (int i = 0; i < plaintext.length(); i++) {
 			char curr = plaintext.charAt(i); // Apply shift
 			if (Character.isLetter(curr)) {
-				curr = (char)(curr + shift); // Apply Shift to only letters
 				if (Character.isUpperCase(curr)) { // Handle Uppercase bounds
+					curr = (char)(curr + shift); // Apply Shift to only letters
 					if (curr < 'A') curr = (char)(curr + 26);
 					else if (curr > 'Z') curr = (char)(curr - 26);
 				}
 				else { // Handle Lowercase bounds
+					curr = (char)(curr + shift); // Apply Shift to only letters
 					if (curr < 'a') curr = (char)(curr + 26);
 					else if (curr > 'z') curr = (char)(curr - 26);
 				}
