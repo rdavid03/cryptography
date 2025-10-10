@@ -1,14 +1,11 @@
 # cryptography
 ## Manual
-<<<<<<< Updated upstream
 - To run the project, compile `CryptosystemsManager.java` and run the compiled file.
 - All of the cryptosystems can be run from the command line when calling the `CryptosystemsManager`
     * The Caesar Cipher can be called to encrypt as follows: `java CryptosystemsManager -e CAESAR "Plaintext"`
     * Or to decrypt as follows: `java CryptosystemsManager -d CAESAR "Ciphertext"`
     * The Shift Cipher can be called to encrypt as follows: `java CryptosystemsManager -e SHIFT (SHIFT AMOUNT) "Plaintext"`
     * Or to decrypt as follows: `java CryptosystemsManager -d SHIFT (SHIFT AMOUNT) "Ciphertext"`
-
-=======
 - To run the project in a terminal;
     1. Go into the source directory - `cd src`
     2. Compile the package run this in the commandline `javac Cryptosystems/*.java`
@@ -30,4 +27,3 @@
         * `SHIFT` -> a number for the amount to shift by. 
         * `VIGNERE` -> a word that will be used to shift the given text.
         * `SUBSTITUTION` -> an alphabet that each letter will be substituted with another. *Note: No need to switch alphabet, code does automatically when decrypting.*
->>>>>>> Stashed changes
